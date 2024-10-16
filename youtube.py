@@ -42,12 +42,12 @@ prompt = ChatPromptTemplate.from_messages([
 ])
 
 # Extract text from the PDF
-link_path = ""  # Adjust the path to your document
+link_path = "https://www.youtube.com/watch?v=okolv1y6IlE"  # organic chemistry sample video 
 video_text = extract_text_from_yt(link_path)
 
 # Split the document into manageable chunks
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=750, chunk_overlap=100)
-chunks = text_splitter.split_text(video_text)
+chunks = text_splitter.split_text(video_text[0].page_content)
 
 # Initialize a list to store all flashcards
 all_flashcards = []
@@ -70,4 +70,3 @@ for i, card in enumerate(all_flashcards, 1):
     print(f"\nFlashcard {i}:")
     print(f"Question: {card['question']}")
     print(f"Answer: {card['answer']}")
-
