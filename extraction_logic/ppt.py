@@ -1,6 +1,5 @@
 import os
-import PyPDF2
-import base64
+from pptx import Presentation
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from typing_extensions import Annotated, TypedDict, List
@@ -22,13 +21,14 @@ class FlashcardSet(TypedDict):
     """Set of flashcards."""
     flashcards: Annotated[List[Flashcard], "A list of flashcards based on the input text"]
 
-# Function to extract text from a PDF using PyPDF2
-def extract_text_from_pdf(pdf_path: str) -> str:
-    with open(pdf_path, "rb") as file:
-        reader = PyPDF2.PdfReader(file)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() or ""
+# Function to extract text from a PowerPoint presentation (.pptx) using python-pptx
+def extract_text_from_pptx(pptx_path: str) -> str:
+    presentation = Presentation(pptx_path)
+    text = ""
+    for slide in presentation.slides:
+        for shape in slide.shapes:
+            if hasattr(shape, "text"):
+                text += shape.text + "\n"
     return text
 
 
@@ -43,22 +43,24 @@ prompt = ChatPromptTemplate.from_messages([
 ])
 
 # Extract text from the PDF
-pdf_path = "study/DA-unit 1 part 2.pdf"  # Adjust the path to your document
-pdf_text = extract_text_from_pdf(pdf_path)
+ppt_path = ""  # Adjust the path to your document
+ppt_text = extract_text_from_pptx(ppt_path)
 
 # Split the document into manageable chunks
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=750, chunk_overlap=100)
-chunks = text_splitter.split_text(pdf_text)
+chunks = text_splitter.split_text(ppt_text)
 
 # Initialize a list to store all flashcards
 all_flashcards = []
 
-# Generate flashcards and add images if available
 for chunk in chunks:
     if chunk.strip():  # Check if the chunk is not empty
+        try:
             response = structured_llm.invoke(prompt.format(chunk=chunk))
             if 'flashcards' in response:
-                    all_flashcards.extend(response['flashcards'])
+                all_flashcards.extend(response['flashcards'])
+        except Exception as e:
+            print(f"Error generating flashcards for chunk")
     else:
         print("Empty chunk detected, skipping...")
 
