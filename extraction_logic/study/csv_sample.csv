@@ -1,0 +1,11 @@
+Term,Definition
+Artificial Intelligence,The simulation of human intelligence processes by machines.
+Machine Learning,A subset of AI that allows systems to learn from data.
+Deep Learning,A subset of ML that uses multi-layered neural networks to analyze data.
+Supervised Learning,A type of ML where the model is trained using labeled data.
+Unsupervised Learning,A type of ML where the model learns from unlabelled data.
+Reinforcement Learning,A type of ML that focuses on how agents take actions in an environment to maximize rewards.
+Neural Networks,Computational models inspired by the human brain that are used for pattern recognition.
+Natural Language Processing,A field of AI that focuses on the interaction between computers and humans through natural language.
+Computer Vision,A field of AI that enables computers to interpret and understand visual information from the world.
+Overfitting,"A modeling error that occurs when a model is too complex, capturing noise instead of the underlying pattern."

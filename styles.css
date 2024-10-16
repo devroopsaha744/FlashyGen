@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f4ff;
+    background-color: #e0f7fa; /* Light turquoise background for vibrancy */
     color: #333;
     margin: 0;
     padding: 20px;
@@ -11,77 +11,83 @@ body {
     margin: 0 auto;
     padding: 20px;
     background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px; /* Slightly increased rounding */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Deeper shadow for pop effect */
 }
 
 h1 {
     text-align: center;
-    color: #5a5a5a;
+    color: #00796b; /* Deep teal for heading */
+    font-size: 28px; /* Slightly larger font */
 }
 
 .option-selection {
     display: flex;
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: 25px; /* Slightly larger spacing */
 }
 
 .option-button {
-    padding: 10px 20px;
+    padding: 12px 24px; /* Increased padding */
     border: none;
-    border-radius: 5px;
-    background-color: #007bff;
+    border-radius: 25px; /* Rounder buttons */
+    background-color: #26c6da; /* Vibrant turquoise */
     color: white;
     font-size: 16px;
     cursor: pointer;
-    margin: 0 10px;
-    transition: background-color 0.3s;
+    margin: 0 15px; /* Increased margin between buttons */
+    transition: background-color 0.3s, transform 0.2s; /* Add transform transition */
 }
 
 .option-button:hover {
-    background-color: #0056b3;
+    background-color: #0097a7; /* Darker turquoise on hover */
+    transform: scale(1.05); /* Slight zoom effect */
 }
 
 .option-button.active {
-    background-color: #0056b3;
+    background-color: #00838f; /* Dark teal for active */
     font-weight: bold;
 }
 
 .upload-section {
     margin: 20px 0;
-    padding: 15px;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
+    padding: 20px; /* Increased padding */
+    border: 1px solid #b2ebf2; /* Lighter border to match theme */
+    border-radius: 10px; /* Rounded corners */
+    background-color: #f1f8e9; /* Soft green background for sections */
 }
 
 .upload-section label {
     display: block;
-    margin-bottom: 10px;
+    margin-bottom: 12px; /* Slightly more space */
     font-weight: bold;
+    color: #388e3c; /* Greenish shade */
 }
 
 .upload-section input[type="file"],
 .upload-section input[type="text"] {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #80deea; /* Light turquoise border */
+    border-radius: 8px;
+    background-color: #ffffff; /* White for better readability */
 }
 
 .styled-button {
-    padding: 10px 20px;
+    padding: 12px 24px;
     border: none;
-    border-radius: 5px;
-    background-color: #28a745;
+    border-radius: 25px;
+    background-color: #66bb6a; /* Light green for action button */
     color: white;
     font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.2s; /* Same animation for consistency */
 }
 
 .styled-button:hover {
-    background-color: #218838;
+    background-color: #388e3c; /* Darker green on hover */
+    transform: scale(1.05); /* Slight zoom effect */
 }
 
 .hidden {
@@ -89,30 +95,34 @@ h1 {
 }
 
 .flashcard {
-    border: 1px solid #007bff;
-    border-radius: 5px;
-    padding: 15px;
-    margin: 10px 0;
-    background-color: #f8f9fa;
+    border: 2px solid #26a69a; /* More vibrant border color */
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px 0;
+    background-color: #ffffff; /* White background to keep it clean */
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
 }
 
 .flashcard img {
     max-width: 100%;
     height: auto;
-    border-radius: 5px;
+    border-radius: 8px;
+    margin-top: 15px;
 }
 
 .question-text {
     font-weight: bold;
+    color: #00796b; /* Match heading color */
 }
 
 .answer-text {
     color: #555;
+    margin-top: 10px; /* Slightly more space */
 }
 
 footer {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 30px;
     font-size: 14px;
-    color: #666;
+    color: #757575; /* Light grey for footer text */
 }

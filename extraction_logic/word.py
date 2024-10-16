@@ -41,7 +41,7 @@ prompt = ChatPromptTemplate.from_messages([
 ])
 
 # Extract text from the PDF
-word_path = ""  # Adjust the path to your document
+word_path = "extraction_logic\study\DAA devroop.docx"  # Adjust the path to your document
 word_text = extract_text_from_word(word_path)
 
 # Split the document into manageable chunks
@@ -68,7 +68,4 @@ for i, card in enumerate(all_flashcards, 1):
     print(f"\nFlashcard {i}:")
     print(f"Question: {card['question']}")
     print(f"Answer: {card['answer']}")
-    if card['image_data']:
-        print(f"Image Data (Base64): {card['image_data'][:20]}...")  # Print only the first 100 characters
-    else:
-        print("No image associated.")
+

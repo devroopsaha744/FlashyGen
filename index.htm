@@ -13,6 +13,11 @@
         <div class="option-selection">
             <button id="pdf-option" class="option-button active">Upload PDF</button>
             <button id="youtube-option" class="option-button">YouTube Video</button>
+            <button id="ppt-option" class="option-button">Upload PPT</button>
+            <button id="docx-option" class="option-button">Upload DOCX</button>
+            <button id="spreadsheet-option" class="option-button">Upload Spreadsheet</button>
+            <button id="webpage-option" class="option-button">Webpage</button>
+            <button id="text-option" class="option-button">Enter Text</button>
         </div>
 
         <!-- PDF Upload Section -->
@@ -29,6 +34,41 @@
             <button id="link-btn" class="styled-button">Generate Flashcards</button>
         </div>
 
+        <!-- PPT Upload Section -->
+        <div id="ppt-upload-section" class="upload-section hidden">
+            <label for="ppt-upload">Upload a PPT file to create flashcards:</label>
+            <input type="file" id="ppt-upload" accept=".ppt,.pptx" />
+            <button id="ppt-btn" class="styled-button">Generate Flashcards</button>
+        </div>
+
+        <!-- DOCX Upload Section -->
+        <div id="docx-upload-section" class="upload-section hidden">
+            <label for="docx-upload">Upload a DOCX file to create flashcards:</label>
+            <input type="file" id="docx-upload" accept=".docx" />
+            <button id="docx-btn" class="styled-button">Generate Flashcards</button>
+        </div>
+
+        <!-- Spreadsheet Upload Section -->
+        <div id="spreadsheet-upload-section" class="upload-section hidden">
+            <label for="spreadsheet-upload">Upload a Spreadsheet to create flashcards:</label>
+            <input type="file" id="spreadsheet-upload" accept=".xlsx,.csv" />
+            <button id="spreadsheet-btn" class="styled-button">Generate Flashcards</button>
+        </div>
+
+        <!-- Webpage Section -->
+        <div id="webpage-section" class="upload-section hidden">
+            <label for="webpage-link">Paste Webpage URL:</label>
+            <input type="text" id="webpage-link" placeholder="https://example.com" />
+            <button id="webpage-btn" class="styled-button">Generate Flashcards</button>
+        </div>
+
+        <!-- Text Input Section -->
+        <div id="text-input-section" class="upload-section hidden">
+            <label for="text-input">Enter Text to create flashcards:</label>
+            <textarea id="text-input" rows="6" placeholder="Enter your text here..."></textarea>
+            <button id="text-btn" class="styled-button">Generate Flashcards</button>
+        </div>
+
         <!-- Flashcards Display Section -->
         <div id="flashcards-container">
             <!-- Flashcards will be appended here dynamically -->
@@ -41,37 +81,34 @@
 
     <script>
         // JavaScript logic for handling button clicks and toggling visibility
-        const pdfOption = document.getElementById('pdf-option');
-        const youtubeOption = document.getElementById('youtube-option');
-        const pdfUploadSection = document.getElementById('pdf-upload-section');
-        const youtubeLinkSection = document.getElementById('youtube-link-section');
+        const options = {
+            pdf: 'pdf-upload-section',
+            youtube: 'youtube-link-section',
+            ppt: 'ppt-upload-section',
+            docx: 'docx-upload-section',
+            spreadsheet: 'spreadsheet-upload-section',
+            webpage: 'webpage-section',
+            text: 'text-input-section'
+        };
 
-        pdfOption.addEventListener('click', () => {
-            pdfOption.classList.add('active');
-            youtubeOption.classList.remove('active');
-            pdfUploadSection.classList.remove('hidden');
-            youtubeLinkSection.classList.add('hidden');
+        Object.keys(options).forEach(option => {
+            const button = document.getElementById(`${option}-option`);
+            const section = document.getElementById(options[option]);
+
+            button.addEventListener('click', () => {
+                // Make the clicked button active and show its corresponding section
+                Object.keys(options).forEach(opt => {
+                    document.getElementById(`${opt}-option`).classList.remove('active');
+                    document.getElementById(options[opt]).classList.add('hidden');
+                });
+                button.classList.add('active');
+                section.classList.remove('hidden');
+            });
         });
 
-        youtubeOption.addEventListener('click', () => {
-            youtubeOption.classList.add('active');
-            pdfOption.classList.remove('active');
-            youtubeLinkSection.classList.remove('hidden');
-            pdfUploadSection.classList.add('hidden');
-        });
-
-        document.getElementById("upload-btn").addEventListener("click", async function () {
-            const fileInput = document.getElementById("pdf-upload");
-            const file = fileInput.files[0];
-            if (!file) {
-                alert("Please upload a PDF file.");
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append("file", file);
-
-            const response = await fetch("http://localhost:8000/upload/", {
+        // Event listener functions for each section's button
+        async function handleUpload(event, formData, endpoint) {
+            const response = await fetch(endpoint, {
                 method: "POST",
                 body: formData
             });
@@ -82,26 +119,25 @@
             } else {
                 alert("Failed to generate flashcards.");
             }
-        });
+        }
 
-        document.getElementById("link-btn").addEventListener("click", async function () {
-            const linkInput = document.getElementById("youtube-link").value;
-            if (!linkInput) {
-                alert("Please paste a YouTube video link.");
+        document.getElementById("upload-btn").addEventListener("click", () => {
+            const fileInput = document.getElementById("pdf-upload");
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Please upload a PDF file.");
                 return;
             }
-
-            const response = await fetch(`http://localhost:8000/upload/?link=${encodeURIComponent(linkInput)}`, {
-                method: "POST",
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                displayFlashcards(data.flashcards);
-            } else {
-                alert("Failed to generate flashcards.");
-            }
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("method", "pdf");
+            handleUpload(event, formData, "http://localhost:8000/upload/");
         });
+
+        // Similar event listener logic for YouTube, PPT, DOCX, Spreadsheet, Webpage, and Text options
+        // Here, you would similarly create event listeners for `ppt-btn`, `docx-btn`, `spreadsheet-btn`, `webpage-btn`, and `text-btn`.
+        // For the YouTube and Webpage sections, you will need to pass the link as a form parameter.
+        // For the Text section, the text content will be passed as a form parameter.
 
         function displayFlashcards(flashcards) {
             const container = document.getElementById("flashcards-container");
@@ -114,11 +150,6 @@
                     <div class="question-text">Q: ${card.question}</div>
                     <div class="answer-text">A: ${card.answer}</div>
                 `;
-                if (card.image_data) {
-                    const img = document.createElement("img");
-                    img.src = `data:image/png;base64,${card.image_data}`;
-                    flashcard.appendChild(img);
-                }
                 container.appendChild(flashcard);
             });
         }
