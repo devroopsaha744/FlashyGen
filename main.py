@@ -8,7 +8,8 @@ import PyPDF2
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import YoutubeLoader
+from langchain.document_loaders import YoutubeLoader  # Make sure to import YoutubeLoader
+
 # Load environment variables
 load_dotenv()
 api_key = os.getenv("GROQ_API_KEY")
@@ -41,13 +42,11 @@ def extract_text_from_pdf(file) -> str:
         text += page.extract_text() or ""
     return text
 
-# Function to extract transcript from a YouTube video
-def extract_text_from_yt(link_path: str) -> str:
-    loader = YoutubeLoader.from_youtube_url(
-    link_path, add_video_info=False
-)
-    txt=  loader.load()
-    return txt[0].page_content
+# Function to extract text from a YouTube video
+def extract_text_from_youtube(link_path: str) -> str:
+    loader = YoutubeLoader.from_youtube_url(link_path, add_video_info=False)
+    txt = loader.load()
+    return txt
 
 # Set up the LLM
 llm = ChatGroq(temperature=0, model="llama3-groq-70b-8192-tool-use-preview")
@@ -61,19 +60,16 @@ prompt = ChatPromptTemplate.from_messages([
 
 @app.post("/upload/")
 async def create_flashcards(
+    method: str = Form(...),  # Method can be 'pdf' or 'youtube'
     link: str = Form(None), 
     file: UploadFile = File(None)
 ):
-    # Check if both file and link are provided
-    if not (file or link):
-        raise HTTPException(status_code=400, detail="Provide either a PDF file or a YouTube link.")
-
     all_flashcards = []
 
-    if file:
-        if not file.filename.endswith(".pdf"):
-            raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
-        
+    if method == "pdf":
+        if not file or not file.filename.endswith(".pdf"):
+            raise HTTPException(status_code=400, detail="Please upload a valid PDF file.")
+
         # Read the file as a binary stream
         pdf_text = extract_text_from_pdf(file.file)
 
@@ -88,27 +84,28 @@ async def create_flashcards(
                     if 'flashcards' in response:
                         all_flashcards.extend(response['flashcards'])
                 except Exception as e:
-                    print(f"Error generating flashcards for PDF chunk: {e}")
+                    print(f"Error generating flashcards for chunk: {e}")
 
-    elif link:
-        # Extract text from YouTube video
+    elif method == "youtube":
+        if not link:
+            raise HTTPException(status_code=400, detail="Please provide a valid YouTube link.")
+
         try:
-            yt_text = extract_text_from_yt(link)
+            youtube_text = extract_text_from_youtube(link)
             # Split the YouTube transcript into manageable chunks
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=750, chunk_overlap=100)
-            chunks = text_splitter.split_text(yt_text)
+            chunks = text_splitter.split_text(youtube_text[0].page_content)
 
             for chunk in chunks:
                 if chunk.strip():  # Check if the chunk is not empty
-                    try:
-                        response = structured_llm.invoke(prompt.format(chunk=chunk))
-                        if 'flashcards' in response:
-                            all_flashcards.extend(response['flashcards'])
-                    except Exception as e:
-                        print(f"Error generating flashcards for YouTube chunk: {e}")
-
+                    response = structured_llm.invoke(prompt.format(chunk=chunk))
+                    if 'flashcards' in response:
+                        all_flashcards.extend(response['flashcards'])
         except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Error extracting text from YouTube video: {e}")
+            raise HTTPException(status_code=500, detail=f"Error extracting text from YouTube: {str(e)}")
+
+    else:
+        raise HTTPException(status_code=400, detail="Invalid method. Use 'pdf' or 'youtube'.")
 
     return JSONResponse(content={"flashcards": all_flashcards})
 
