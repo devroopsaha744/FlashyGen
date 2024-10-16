@@ -1,6 +1,7 @@
 import os
 import PyPDF2
 import fitz  # PyMuPDF for image extraction
+import base64
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from typing_extensions import Annotated, TypedDict, List
@@ -17,7 +18,7 @@ class Flashcard(TypedDict):
     question: Annotated[str, "The question or prompt on the front of the flashcard"]
     answer: Annotated[str, "The answer or explanation on the back of the flashcard"]
     importance: Annotated[int, "How important this concept is, from 1 to 10"]
-    image_path: Annotated[str, "Path to the associated image, if any"]
+    image_data: Annotated[str, "Base64 encoded image data, if any"]
 
 # A set of flashcards
 class FlashcardSet(TypedDict):
@@ -33,15 +34,12 @@ def extract_text_from_pdf(pdf_path: str) -> str:
             text += page.extract_text() or ""
     return text
 
-# Function to extract images from the PDF using PyMuPDF
-def extract_images_from_pdf(pdf_path: str, output_folder: str = "extracted_images") -> list:
-    """Extracts images from a PDF and saves them to the specified folder."""
-    # Create the output folder if it doesn't exist
-    os.makedirs(output_folder, exist_ok=True)
-    
+# Function to extract images from the PDF and encode them in base64
+def extract_images_from_pdf(pdf_path: str) -> list:
+    """Extracts images from a PDF and returns them as base64 encoded strings."""
     # Open the PDF
     doc = fitz.open(pdf_path)
-    image_paths = []
+    encoded_images = []
 
     # Iterate through each page
     for page_number in range(len(doc)):
@@ -53,19 +51,13 @@ def extract_images_from_pdf(pdf_path: str, output_folder: str = "extracted_image
             xref = img[0]
             base_image = doc.extract_image(xref)
             image_bytes = base_image["image"]
-            image_ext = base_image["ext"]
-            image_filename = f"page{page_number + 1}_img{img_index + 1}.{image_ext}"
-            image_path = os.path.join(output_folder, image_filename)
-
-            # Save the image
-            with open(image_path, "wb") as image_file:
-                image_file.write(image_bytes)
-
-            # Keep track of the image path
-            image_paths.append(image_path)
+            
+            # Encode the image in base64
+            encoded_image = base64.b64encode(image_bytes).decode("utf-8")
+            encoded_images.append(encoded_image)
     
     doc.close()
-    return image_paths
+    return encoded_images
 
 # Set up the LLM
 llm = ChatGroq(temperature=0, model="llama3-groq-70b-8192-tool-use-preview")
@@ -101,10 +93,10 @@ for chunk in chunks:
                 for flashcard in response['flashcards']:
                     # Attach an image to the flashcard if available
                     if image_index < len(extracted_images):
-                        flashcard['image_path'] = extracted_images[image_index]
+                        flashcard['image_data'] = extracted_images[image_index]
                         image_index += 1
                     else:
-                        flashcard['image_path'] = None  # No image available
+                        flashcard['image_data'] = None  # No image available
                     all_flashcards.append(flashcard)
         except Exception as e:
             print(f"Error generating flashcards for chunk: {e}")
@@ -117,7 +109,7 @@ for i, card in enumerate(all_flashcards, 1):
     print(f"\nFlashcard {i}:")
     print(f"Question: {card['question']}")
     print(f"Answer: {card['answer']}")
-    if card['image_path']:
-        print(f"Image: {card['image_path']}")
+    if card['image_data']:
+        print(f"Image Data (Base64): {card['image_data'][:20]}...")  # Print only the first 100 characters
     else:
         print("No image associated.")
