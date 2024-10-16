@@ -23,7 +23,7 @@ class FlashcardSet(TypedDict):
     """Set of flashcards."""
     flashcards: Annotated[List[Flashcard], "A list of flashcards based on the input text"]
 
-# Function to extract text from a PDF using PyPDF2
+# Function to extract text from a PDF using YoutubeLoader
 def extract_text_from_yt(link_path: str) -> str:
     loader = YoutubeLoader.from_youtube_url(
     link_path, add_video_info=False
