@@ -28,7 +28,8 @@ def extract_text_from_yt(link_path: str) -> str:
     loader = YoutubeLoader.from_youtube_url(
     link_path, add_video_info=False
 )
-    return loader.load()
+    txt=  loader.load()
+    return txt
 
 # Set up the LLM
 llm = ChatGroq(temperature=0, model="llama3-groq-70b-8192-tool-use-preview")
