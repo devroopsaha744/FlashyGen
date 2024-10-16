@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard Learning App</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to the external CSS file -->
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Flashcard Learning App</h1>
+        
+        <!-- PDF Upload Section -->
+        <div class="upload-section">
+            <label for="pdf-upload">Upload a PDF file to create flashcards:</label>
+            <input type="file" id="pdf-upload" accept=".pdf" />
+            <button id="upload-btn">Generate Flashcards</button>
+        </div>
+
+        <!-- Flashcards Display Section -->
+        <div id="flashcards-container">
+            <!-- Flashcards will be appended here dynamically -->
+        </div>
+
+        <footer>
+            <p>Enhance your learning with flashcards! ✨</p>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById("upload-btn").addEventListener("click", async function () {
+            const fileInput = document.getElementById("pdf-upload");
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Please upload a PDF file.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await fetch("http://localhost:8000/upload/", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                displayFlashcards(data.flashcards);
+            } else {
+                alert("Failed to generate flashcards.");
+            }
+        });
+
+        function displayFlashcards(flashcards) {
+            const container = document.getElementById("flashcards-container");
+            container.innerHTML = ""; // Clear existing flashcards
+
+            flashcards.forEach((card) => {
+                const flashcard = document.createElement("div");
+                flashcard.className = "flashcard";
+                flashcard.innerHTML = `
+                    <div class="question-text">Q: ${card.question}</div>
+                    <div class="answer-text">A: ${card.answer}</div>
+                `;
+                container.appendChild(flashcard);
+            });
+        }
+    </script>
+</body>
+</html>
