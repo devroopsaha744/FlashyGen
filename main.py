@@ -1,19 +1,20 @@
 import os
-from typing_extensions import Annotated, TypedDict, List
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing_extensions import Annotated, TypedDict, List
+from typing import List, Optional
 from dotenv import load_dotenv
 import PyPDF2
 import pptx  # For PPTX extraction
 import docx  # For DOCX extraction
 import csv   # For CSV extraction
-import requests
+import io
+from io import BytesIO
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import YoutubeLoader
-from langchain.document_loaders import WebBaseLoader
 
 # Load environment variables
 load_dotenv()
@@ -22,22 +23,25 @@ api_key = os.getenv("GROQ_API_KEY")
 # Set up FastAPI
 app = FastAPI()
 
-# CORS middleware to allow requests from the frontend
+# Enable CORS for all origins, can be restricted in production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this to restrict origins in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Define the Flashcard structure
 class Flashcard(TypedDict):
+    """Flashcard for learning."""
     question: Annotated[str, "The question or prompt on the front of the flashcard"]
     answer: Annotated[str, "The answer or explanation on the back of the flashcard"]
 
+# A set of flashcards
 class FlashcardSet(TypedDict):
+    """Set of flashcards."""
     flashcards: Annotated[List[Flashcard], "A list of flashcards based on the input text"]
+
 
 # Text extraction functions
 def extract_text_from_pdf(file) -> str:
@@ -48,28 +52,37 @@ def extract_text_from_pdf(file) -> str:
     return text
 
 def extract_text_from_pptx(file) -> str:
-    presentation = pptx.Presentation(file)
+    # Convert the SpooledTemporaryFile to a BytesIO stream
+    file_bytes = BytesIO(file.read())
+    presentation = pptx.Presentation(file_bytes)
     text = ""
     for slide in presentation.slides:
         for shape in slide.shapes:
             if hasattr(shape, "text"):
                 text += shape.text + "\n"
+    file.seek(0)  # Reset file pointer after reading
     return text
 
 def extract_text_from_docx(file) -> str:
-    doc = docx.Document(file)
+    # Convert the SpooledTemporaryFile to a BytesIO stream
+    file_bytes = BytesIO(file.read())
+    doc = docx.Document(file_bytes)
     text = ""
     for paragraph in doc.paragraphs:
         text += paragraph.text + "\n"
+    file.seek(0)  # Reset file pointer after reading
     return text
+
 
 def extract_text_from_csv(file) -> str:
+    # Decode the bytes to a string and then use io.StringIO to create a text stream
+    decoded_file = io.StringIO(file.read().decode("utf-8"))
     text = ""
-    reader = csv.reader(file)
+    reader = csv.reader(decoded_file)
     for row in reader:
         text += " ".join(row) + "\n"
+    file.seek(0)  # Reset file pointer after reading
     return text
-
 
 def extract_text_from_youtube(link_path: str) -> str:
     loader = YoutubeLoader.from_youtube_url(link_path, add_video_info=False)
@@ -88,10 +101,10 @@ prompt = ChatPromptTemplate.from_messages([
 
 @app.post("/flashcard/")
 async def create_flashcards(
-    method: str = Form(...),  # Method can be 'pdf', 'pptx', 'docx', 'csv', 'webpage', 'youtube', or 'text'
-    link: str = Form(None), 
-    file: UploadFile = File(None),
-    text: str = Form(None)
+    method: str = Form(...),
+    link: Optional[str] = Form(None),
+    text: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None)
 ):
     all_flashcards = []
 
@@ -144,6 +157,8 @@ async def create_flashcards(
             except Exception as e:
                 print(f"Error generating flashcards for chunk: {e}")
 
-    return JSONResponse(content={"flashcards": all_flashcards})
+    return {"flashcards": all_flashcards}
 
-# Run the server with: uvicorn api:app --reload
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, debug=True)

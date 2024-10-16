@@ -5,6 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flashcard Learning App</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Spinner styles */
+        .spinner {
+            border: 5px solid #f3f3f3; /* Light grey */
+            border-top: 5px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none; /* Hide spinner initially */
+            margin: 10px auto; /* Center the spinner */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .upload-section {
+            margin: 20px 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .active {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .styled-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .styled-button:hover {
+            background-color: #2980b9;
+        }
+
+        .flashcard {
+            border: 1px solid #3498db;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -16,7 +67,6 @@
             <button id="ppt-option" class="option-button">Upload PPT</button>
             <button id="docx-option" class="option-button">Upload DOCX</button>
             <button id="spreadsheet-option" class="option-button">Upload Spreadsheet</button>
-            <button id="webpage-option" class="option-button">Webpage</button>
             <button id="text-option" class="option-button">Enter Text</button>
         </div>
 
@@ -25,6 +75,7 @@
             <label for="pdf-upload">Upload a PDF file to create flashcards:</label>
             <input type="file" id="pdf-upload" accept=".pdf" />
             <button id="upload-btn" class="styled-button">Generate Flashcards</button>
+            <div id="pdf-spinner" class="spinner"></div> <!-- Spinner for PDF -->
         </div>
 
         <!-- YouTube Link Section -->
@@ -32,6 +83,7 @@
             <label for="youtube-link">Paste YouTube Video Link:</label>
             <input type="text" id="youtube-link" placeholder="https://www.youtube.com/watch?v=VIDEO_ID" />
             <button id="link-btn" class="styled-button">Generate Flashcards</button>
+            <div id="youtube-spinner" class="spinner"></div> <!-- Spinner for YouTube -->
         </div>
 
         <!-- PPT Upload Section -->
@@ -39,6 +91,7 @@
             <label for="ppt-upload">Upload a PPT file to create flashcards:</label>
             <input type="file" id="ppt-upload" accept=".ppt,.pptx" />
             <button id="ppt-btn" class="styled-button">Generate Flashcards</button>
+            <div id="ppt-spinner" class="spinner"></div> <!-- Spinner for PPT -->
         </div>
 
         <!-- DOCX Upload Section -->
@@ -46,6 +99,7 @@
             <label for="docx-upload">Upload a DOCX file to create flashcards:</label>
             <input type="file" id="docx-upload" accept=".docx" />
             <button id="docx-btn" class="styled-button">Generate Flashcards</button>
+            <div id="docx-spinner" class="spinner"></div> <!-- Spinner for DOCX -->
         </div>
 
         <!-- Spreadsheet Upload Section -->
@@ -53,13 +107,7 @@
             <label for="spreadsheet-upload">Upload a Spreadsheet to create flashcards:</label>
             <input type="file" id="spreadsheet-upload" accept=".xlsx,.csv" />
             <button id="spreadsheet-btn" class="styled-button">Generate Flashcards</button>
-        </div>
-
-        <!-- Webpage Section -->
-        <div id="webpage-section" class="upload-section hidden">
-            <label for="webpage-link">Paste Webpage URL:</label>
-            <input type="text" id="webpage-link" placeholder="https://example.com" />
-            <button id="webpage-btn" class="styled-button">Generate Flashcards</button>
+            <div id="spreadsheet-spinner" class="spinner"></div> <!-- Spinner for Spreadsheet -->
         </div>
 
         <!-- Text Input Section -->
@@ -67,6 +115,7 @@
             <label for="text-input">Enter Text to create flashcards:</label>
             <textarea id="text-input" rows="6" placeholder="Enter your text here..."></textarea>
             <button id="text-btn" class="styled-button">Generate Flashcards</button>
+            <div id="text-spinner" class="spinner"></div> <!-- Spinner for Text input -->
         </div>
 
         <!-- Flashcards Display Section -->
@@ -87,7 +136,6 @@
             ppt: 'ppt-upload-section',
             docx: 'docx-upload-section',
             spreadsheet: 'spreadsheet-upload-section',
-            webpage: 'webpage-section',
             text: 'text-input-section'
         };
 
@@ -106,22 +154,32 @@
             });
         });
 
-        // Event listener functions for each section's button
-        async function handleUpload(event, formData, endpoint) {
-            const response = await fetch(endpoint, {
-                method: "POST",
-                body: formData
-            });
+        async function handleUpload(event, formData, endpoint, spinnerId) {
+            const spinner = document.getElementById(spinnerId);
+            spinner.style.display = 'block'; // Show spinner
 
-            if (response.ok) {
-                const data = await response.json();
-                displayFlashcards(data.flashcards);
-            } else {
-                alert("Failed to generate flashcards.");
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayFlashcards(data.flashcards);
+                } else {
+                    alert("Failed to generate flashcards.");
+                }
+            } catch (error) {
+                console.error("Error during fetch:", error);
+                alert("An error occurred while processing your request.");
+            } finally {
+                spinner.style.display = 'none'; // Hide spinner after response
             }
         }
 
-        document.getElementById("upload-btn").addEventListener("click", () => {
+        // PDF Button Event
+        document.getElementById("upload-btn").addEventListener("click", (event) => {
             const fileInput = document.getElementById("pdf-upload");
             const file = fileInput.files[0];
             if (!file) {
@@ -131,26 +189,87 @@
             const formData = new FormData();
             formData.append("file", file);
             formData.append("method", "pdf");
-            handleUpload(event, formData, "http://localhost:8000/upload/");
+            handleUpload(event, formData, "http://localhost:8000/flashcard/", "pdf-spinner");
         });
 
-        // Similar event listener logic for YouTube, PPT, DOCX, Spreadsheet, Webpage, and Text options
-        // Here, you would similarly create event listeners for `ppt-btn`, `docx-btn`, `spreadsheet-btn`, `webpage-btn`, and `text-btn`.
-        // For the YouTube and Webpage sections, you will need to pass the link as a form parameter.
-        // For the Text section, the text content will be passed as a form parameter.
+        // YouTube Button Event
+        document.getElementById("link-btn").addEventListener("click", (event) => {
+            const linkInput = document.getElementById("youtube-link");
+            const link = linkInput.value.trim();
+            if (!link) {
+                alert("Please enter a YouTube link.");
+                return;
+            }
+            const formData = new FormData();
+            formData.append("link", link);
+            formData.append("method", "youtube");
+            handleUpload(event, formData, "http://localhost:8000/flashcard/", "youtube-spinner");
+        });
+
+        // PPT Button Event
+        document.getElementById("ppt-btn").addEventListener("click", (event) => {
+            const fileInput = document.getElementById("ppt-upload");
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Please upload a PPT file.");
+                return;
+            }
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("method", "ppt");
+            handleUpload(event, formData, "http://localhost:8000/flashcard/", "ppt-spinner");
+        });
+
+        // DOCX Button Event
+        document.getElementById("docx-btn").addEventListener("click", (event) => {
+            const fileInput = document.getElementById("docx-upload");
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Please upload a DOCX file.");
+                return;
+            }
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("method", "docx");
+            handleUpload(event, formData, "http://localhost:8000/flashcard/", "docx-spinner");
+        });
+
+        // Spreadsheet Button Event
+        document.getElementById("spreadsheet-btn").addEventListener("click", (event) => {
+            const fileInput = document.getElementById("spreadsheet-upload");
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Please upload a Spreadsheet file.");
+                return;
+            }
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("method", "spreadsheet");
+            handleUpload(event, formData, "http://localhost:8000/flashcard/", "spreadsheet-spinner");
+        });
+
+        // Text Button Event
+        document.getElementById("text-btn").addEventListener("click", (event) => {
+            const textInput = document.getElementById("text-input");
+            const text = textInput.value.trim();
+            if (!text) {
+                alert("Please enter some text.");
+                return;
+            }
+            const formData = new FormData();
+            formData.append("text", text);
+            formData.append("method", "text");
+            handleUpload(event, formData, "http://localhost:8000/flashcard/", "text-spinner");
+        });
 
         function displayFlashcards(flashcards) {
             const container = document.getElementById("flashcards-container");
             container.innerHTML = ""; // Clear existing flashcards
-
-            flashcards.forEach((card) => {
-                const flashcard = document.createElement("div");
-                flashcard.className = "flashcard";
-                flashcard.innerHTML = `
-                    <div class="question-text">Q: ${card.question}</div>
-                    <div class="answer-text">A: ${card.answer}</div>
-                `;
-                container.appendChild(flashcard);
+            flashcards.forEach(card => {
+                const cardElement = document.createElement("div");
+                cardElement.className = "flashcard";
+                cardElement.innerHTML = `<h3>${card.question}</h3><p>${card.answer}</p>`;
+                container.appendChild(cardElement);
             });
         }
     </script>
