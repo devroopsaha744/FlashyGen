@@ -84,6 +84,8 @@ def extract_text_from_csv(file) -> str:
     file.seek(0)  # Reset file pointer after reading
     return text
 
+
+#Yet to work on Youtube logic, everything's working fine
 def extract_text_from_yt(link_path: str) -> str:
     # Extract the video ID from the YouTube URL
     video_id = link_path.split("v=")[-1].split("&")[0]
