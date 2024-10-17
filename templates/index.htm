@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flashcard Learning App</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
     <style>
         /* Spinner styles */
         .spinner {
@@ -216,7 +216,7 @@
             }
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("method", "ppt");
+            formData.append("method", "pptx");
             handleUpload(event, formData, "http://localhost:8000/flashcard/", "ppt-spinner");
         });
 
@@ -244,7 +244,7 @@
             }
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("method", "spreadsheet");
+            formData.append("method", "csv");
             handleUpload(event, formData, "http://localhost:8000/flashcard/", "spreadsheet-spinner");
         });
 

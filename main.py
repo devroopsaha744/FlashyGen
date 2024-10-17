@@ -98,6 +98,9 @@ prompt = ChatPromptTemplate.from_messages([
     ("system", "Generate a set of flashcards from the given text. Focus on key concepts and important information."),
     ("human", "Text: {chunk}\n\nGenerate a list of flashcards based on this text.")
 ])
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the flashcard generation prototype!"}
 
 @app.post("/flashcard/")
 async def create_flashcards(
