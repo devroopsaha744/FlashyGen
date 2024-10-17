@@ -59,7 +59,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>📚 Flashcard Learning App</h1>
+        <h1>📚 Flashcard Generator Prototype</h1>
 
         <div class="option-selection">
             <button id="pdf-option" class="option-button active">Upload PDF</button>
@@ -189,7 +189,7 @@
             const formData = new FormData();
             formData.append("file", file);
             formData.append("method", "pdf");
-            handleUpload(event, formData, "http://localhost:8000/flashcard/", "pdf-spinner");
+            handleUpload(event, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", "pdf-spinner");
         });
 
         // YouTube Button Event
@@ -203,7 +203,7 @@
             const formData = new FormData();
             formData.append("link", link);
             formData.append("method", "youtube");
-            handleUpload(event, formData, "http://localhost:8000/flashcard/", "youtube-spinner");
+            handleUpload(event, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", "youtube-spinner");
         });
 
         // PPT Button Event
@@ -217,7 +217,7 @@
             const formData = new FormData();
             formData.append("file", file);
             formData.append("method", "pptx");
-            handleUpload(event, formData, "http://localhost:8000/flashcard/", "ppt-spinner");
+            handleUpload(event, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", "ppt-spinner");
         });
 
         // DOCX Button Event
@@ -231,7 +231,7 @@
             const formData = new FormData();
             formData.append("file", file);
             formData.append("method", "docx");
-            handleUpload(event, formData, "http://localhost:8000/flashcard/", "docx-spinner");
+            handleUpload(event, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", "docx-spinner");
         });
 
         // Spreadsheet Button Event
@@ -245,7 +245,7 @@
             const formData = new FormData();
             formData.append("file", file);
             formData.append("method", "csv");
-            handleUpload(event, formData, "http://localhost:8000/flashcard/", "spreadsheet-spinner");
+            handleUpload(event, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", "spreadsheet-spinner");
         });
 
         // Text Button Event
@@ -259,7 +259,7 @@
             const formData = new FormData();
             formData.append("text", text);
             formData.append("method", "text");
-            handleUpload(event, formData, "http://localhost:8000/flashcard/", "text-spinner");
+            handleUpload(event, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", "text-spinner");
         });
 
         function displayFlashcards(flashcards) {
