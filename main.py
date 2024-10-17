@@ -14,7 +14,7 @@ from io import BytesIO
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.document_loaders import YoutubeLoader
+from youtube_transcript_api import YouTubeTranscriptApi  #for youtube
 
 # Load environment variables
 load_dotenv()
@@ -84,10 +84,22 @@ def extract_text_from_csv(file) -> str:
     file.seek(0)  # Reset file pointer after reading
     return text
 
-def extract_text_from_youtube(link_path: str) -> str:
-    loader = YoutubeLoader.from_youtube_url(link_path, add_video_info=False)
-    txt = loader.load()
-    return txt
+def extract_text_from_yt(link_path: str) -> str:
+    # Extract the video ID from the YouTube URL
+    video_id = link_path.split("v=")[-1].split("&")[0]
+
+    try:
+        # Fetch the transcript using the YouTubeTranscriptApi
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+
+        # Combine the text from the transcript into a single string
+        text = " ".join([entry['text'] for entry in transcript])
+        return text
+
+    except Exception as e:
+        # Handle cases where the transcript is not available
+        print(f"Error fetching transcript: {e}")
+        return ""
 
 # Set up the LLM
 llm = ChatGroq(temperature=0, model="llama3-groq-70b-8192-tool-use-preview")
@@ -139,8 +151,8 @@ async def create_flashcards(
     elif method == "youtube":
         if not link:
             raise HTTPException(status_code=400, detail="Please provide a valid YouTube link.")
-        youtube_text = extract_text_from_youtube(link)
-        chunks = RecursiveCharacterTextSplitter(chunk_size=750, chunk_overlap=100).split_text(youtube_text[0].page_content)
+        youtube_text = extract_text_from_yt(link)
+        chunks = RecursiveCharacterTextSplitter(chunk_size=750, chunk_overlap=100).split_text(youtube_text)
 
     elif method == "text":
         if not text:

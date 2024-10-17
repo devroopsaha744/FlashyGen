@@ -5,8 +5,7 @@ from langchain.prompts import ChatPromptTemplate
 from typing_extensions import Annotated, TypedDict, List
 from dotenv import load_dotenv
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import YoutubeLoader
-
+from youtube_transcript_api import YouTubeTranscriptApi
 # Load environment variables
 load_dotenv()
 api_key = os.getenv("GROQ_API_KEY")
@@ -25,11 +24,21 @@ class FlashcardSet(TypedDict):
 
 # Function to extract text from a PDF using YoutubeLoader
 def extract_text_from_yt(link_path: str) -> str:
-    loader = YoutubeLoader.from_youtube_url(
-    link_path, add_video_info=False
-)
-    txt=  loader.load()
-    return txt
+    # Extract the video ID from the YouTube URL
+    video_id = link_path.split("v=")[-1].split("&")[0]
+
+    try:
+        # Fetch the transcript using the YouTubeTranscriptApi
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+
+        # Combine the text from the transcript into a single string
+        text = " ".join([entry['text'] for entry in transcript])
+        return text
+
+    except Exception as e:
+        # Handle cases where the transcript is not available
+        print(f"Error fetching transcript: {e}")
+        return ""
 
 # Set up the LLM
 llm = ChatGroq(temperature=0, model="llama3-groq-70b-8192-tool-use-preview")
@@ -47,7 +56,7 @@ video_text = extract_text_from_yt(link_path)
 
 # Split the document into manageable chunks
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=750, chunk_overlap=100)
-chunks = text_splitter.split_text(video_text[0].page_content)
+chunks = text_splitter.split_text(video_text)
 
 # Initialize a list to store all flashcards
 all_flashcards = []
