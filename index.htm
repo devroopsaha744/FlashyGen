@@ -4,9 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flashcard Learning App</title>
-    <link rel="stylesheet" href="styles.css">
     <style>
-        /* Spinner styles */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
         .spinner {
             border: 5px solid #f3f3f3;
             border-top: 5px solid #3498db;
@@ -17,25 +34,20 @@
             display: none;
             margin: 10px auto;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
         .upload-section {
             margin: 20px 0;
         }
-
         .hidden {
             display: none;
         }
-
         .active {
             background-color: #3498db;
             color: white;
         }
-
         .styled-button {
             background-color: #3498db;
             color: white;
@@ -43,17 +55,43 @@
             padding: 10px 15px;
             cursor: pointer;
             margin-top: 10px;
+            border-radius: 5px;
         }
-
         .styled-button:hover {
             background-color: #2980b9;
         }
-
         .flashcard {
             border: 1px solid #3498db;
             border-radius: 5px;
-            padding: 10px;
+            padding: 20px;
             margin: 10px 0;
+            cursor: pointer;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .flashcard .answer {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #3498db;
+        }
+        .option-button {
+            background-color: #f0f0f0;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .option-button:hover {
+            background-color: #e0e0e0;
+        }
+        select, input[type="file"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -72,8 +110,8 @@
         <div class="flashcard-type-selection">
             <label for="flashcard-type">Select Flashcard Type:</label>
             <select id="flashcard-type">
-                <option value="traditional">Traditional</option>
-                <option value="cloze">Cloze Deletion</option>
+                <option value="type-I">Traditional</option>
+                <option value="type-II">Cloze Deletion</option>
             </select>
         </div>
 
@@ -155,7 +193,7 @@
             spinner.style.display = 'block';
 
             const flashcardType = document.getElementById("flashcard-type").value;
-            formData.append("type", flashcardType); // Add the flashcard type to the formData
+            formData.append("type", flashcardType);
 
             try {
                 const response = await fetch(endpoint, {
@@ -163,32 +201,40 @@
                     body: formData
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    displayFlashcards(data.flashcards);
-                } else {
-                    alert("Failed to generate flashcards.");
+                if (!response.ok) {
+                    throw new Error(`Server responded with status ${response.status}`);
                 }
+
+                const data = await response.json();
+
+                if (!data.flashcards) {
+                    throw new Error("Unexpected response format, 'flashcards' not found");
+                }
+
+                displayFlashcards(data.flashcards, flashcardType);
             } catch (error) {
                 console.error("Error during fetch:", error);
-                alert("An error occurred while processing your request.");
+                alert("An error occurred while processing your request. Please try again.");
             } finally {
                 spinner.style.display = 'none';
             }
         }
 
         function setupButtonEvent(buttonId, fileInputId, method, spinnerId) {
-            document.getElementById(buttonId).addEventListener("click", (event) => {
+            document.getElementById(buttonId).addEventListener("click", () => {
                 const fileInput = document.getElementById(fileInputId);
                 const file = fileInput.files[0];
+
                 if (!file) {
                     alert("Please upload a file.");
                     return;
                 }
+
                 const formData = new FormData();
                 formData.append("file", file);
                 formData.append("method", method);
-                handleUpload(event, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", spinnerId);
+
+                handleUpload(null, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", spinnerId);
             });
         }
 
@@ -197,27 +243,47 @@
         setupButtonEvent("docx-btn", "docx-upload", "docx", "docx-spinner");
         setupButtonEvent("spreadsheet-btn", "spreadsheet-upload", "csv", "spreadsheet-spinner");
 
-        document.getElementById("text-btn").addEventListener("click", (event) => {
-            const textInput = document.getElementById("text-input");
-            const text = textInput.value.trim();
-            if (!text) {
+        document.getElementById("text-btn").addEventListener("click", () => {
+            const textInput = document.getElementById("text-input").value.trim();
+
+            if (!textInput) {
                 alert("Please enter some text.");
                 return;
             }
+
             const formData = new FormData();
-            formData.append("text", text);
+            formData.append("text", textInput);
             formData.append("method", "text");
-            handleUpload(event, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", "text-spinner");
+
+            handleUpload(null, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", "text-spinner");
         });
 
-        function displayFlashcards(flashcards) {
+        function displayFlashcards(flashcards, type) {
             const container = document.getElementById("flashcards-container");
-            container.innerHTML = "";
-            flashcards.forEach(card => {
-                const cardElement = document.createElement("div");
-                cardElement.className = "flashcard";
-                cardElement.innerHTML = `<h3>${card.question}</h3><p>${card.answer}</p>`;
-                container.appendChild(cardElement);
+            container.innerHTML = '';
+
+            flashcards.forEach((card, index) => {
+                const cardDiv = document.createElement("div");
+                cardDiv.className = 'flashcard';
+                
+                if (type === 'type-I') {
+                    cardDiv.innerHTML = `
+                        <div class="question">${card.question}</div>
+                        <div class="answer">${card.answer}</div>
+                    `;
+                } else if (type === 'type-II') {
+                    cardDiv.innerHTML = `
+                        <div class="question">${card.question_with_blanks}</div>
+                        <div class="answer">${card.correct_answers.join(', ')}</div>
+                    `;
+                }
+
+                cardDiv.addEventListener('click', () => {
+                    const answerDiv = cardDiv.querySelector('.answer');
+                    answerDiv.style.display = answerDiv.style.display === 'none' ? 'block' : 'none';
+                });
+
+                container.appendChild(cardDiv);
             });
         }
     </script>
