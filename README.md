@@ -1,6 +1,6 @@
-# Memory AI
+# FlashyGenDemo
 
-Memory AI is a flashcard generation tool that allows users to create flashcards from various input sources, including text, PDF, PPTX, DOCX, and CSV files. This project is powered by FastAPI for the backend and deployed on Vercel for the frontend.
+FlashyGen is a flashcard generation tool that allows users to create flashcards from various input sources, including text, PDF, PPTX, DOCX, and CSV files. This project is powered by FastAPI for the backend and deployed on Vercel for the frontend.
 
 ## Table of Contents
 
