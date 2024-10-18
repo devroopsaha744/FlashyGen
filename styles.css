@@ -1,112 +1,155 @@
 /* Main CSS for Flashcard Generator */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #e0f7fa; /* Light turquoise background for vibrancy */
+    font-family: 'Roboto', sans-serif;
+    background-color: #f0f4f8;
     color: #333;
     margin: 0;
     padding: 20px;
 }
 
 .container {
-    max-width: 800px;
+    max-width: 850px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 25px;
     background-color: #ffffff;
-    border-radius: 10px; /* Slightly increased rounding */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Deeper shadow for pop effect */
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 h1 {
     text-align: center;
-    color: #00796b; /* Deep teal for heading */
-    font-size: 28px; /* Slightly larger font */
+    color: #3f51b5;
+    font-size: 30px;
+    margin-bottom: 25px;
 }
 
 .option-selection {
     display: flex;
     justify-content: center;
-    margin-bottom: 25px; /* Slightly larger spacing */
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
 }
 
-.option-button {
-    padding: 12px 24px; /* Increased padding */
+.option-button,
+.enter-text-option {
+    padding: 14px 28px;
     border: none;
-    border-radius: 25px; /* Rounder buttons */
-    background-color: #26c6da; /* Vibrant turquoise */
+    border-radius: 30px;
+    background-color: #6200ea;
     color: white;
     font-size: 16px;
     cursor: pointer;
-    margin: 0 15px; /* Increased margin between buttons */
-    transition: background-color 0.3s, transform 0.2s; /* Add transform transition */
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin: 10px;
 }
 
-.option-button:hover {
-    background-color: #0097a7; /* Darker turquoise on hover */
-    transform: scale(1.05); /* Slight zoom effect */
+.option-button:hover,
+.enter-text-option:hover {
+    background-color: #3700b3;
+    transform: translateY(-3px);
 }
 
 .option-button.active {
-    background-color: #00838f; /* Dark teal for active */
+    background-color: #311b92;
     font-weight: bold;
 }
 
+/* Align the "Enter Text" option */
+.enter-text-option {
+    display: inline-block;
+    text-align: center;
+    background-color: #8e24aa; /* Different color to distinguish */
+}
+
+/* Upload section */
 .upload-section {
     margin: 20px 0;
-    padding: 20px; /* Increased padding */
-    border: 1px solid #b2ebf2; /* Lighter border to match theme */
-    border-radius: 10px; /* Rounded corners */
-    background-color: #f1f8e9; /* Soft green background for sections */
+    padding: 25px;
+    border: 2px solid #d1c4e9;
+    border-radius: 12px;
+    background-color: #f3e5f5;
 }
 
 .upload-section label {
     display: block;
-    margin-bottom: 12px; /* Slightly more space */
+    margin-bottom: 15px;
     font-weight: bold;
-    color: #388e3c; /* Greenish shade */
+    color: #512da8;
 }
 
 .upload-section input[type="file"],
-.upload-section input[type="text"],
-.upload-section textarea {
-    width: 100%; /* Make all inputs full width */
-    padding: 12px;
-    margin-bottom: 12px;
-    border: 1px solid #80deea; /* Light turquoise border */
+.upload-section textarea,
+.upload-section select {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    border: 1px solid #b39ddb;
     border-radius: 8px;
-    background-color: #ffffff; /* White for better readability */
+    background-color: #ffffff;
+    font-size: 15px;
 }
 
-.upload-section textarea {
-    resize: vertical; /* Allow vertical resizing only */
+/* Dropdown Styling */
+.upload-section select {
+    appearance: none;
+    background-color: #ffffff;
+    color: #333;
+    font-size: 16px;
+    padding: 14px;
+    border-radius: 30px;
+    border: 1px solid #b39ddb;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%236200EA" d="M2 0L0 2h4z"/></svg>'); /* Custom dropdown arrow */
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    cursor: pointer;
+    width: auto; /* Auto width for dropdown to fit content */
+    min-width: 200px; /* Minimum width for better appearance */
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
+/* Dropdown focus and hover effects */
+.upload-section select:focus,
+.upload-section select:hover {
+    border-color: #6200ea;
+    box-shadow: 0 0 5px rgba(98, 0, 234, 0.3);
+}
+
+/* Styled button for form submissions */
 .styled-button {
-    padding: 12px 24px;
+    padding: 14px 28px;
     border: none;
-    border-radius: 25px;
-    background-color: #66bb6a; /* Light green for action button */
+    border-radius: 30px;
+    background-color: #00c853;
     color: white;
     font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s; /* Same animation for consistency */
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-top: 10px;
 }
 
 .styled-button:hover {
-    background-color: #388e3c; /* Darker green on hover */
-    transform: scale(1.05); /* Slight zoom effect */
+    background-color: #00a344;
+    transform: translateY(-3px);
 }
 
+/* Hidden elements */
 .hidden {
     display: none;
 }
 
+/* Flashcard styles */
 .flashcard {
-    border: 2px solid #26a69a; /* More vibrant border color */
-    border-radius: 8px;
-    padding: 20px;
-    margin: 15px 0;
-    background-color: #ffffff; /* White background to keep it clean */
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
+    border: 2px solid #64b5f6;
+    border-radius: 10px;
+    padding: 25px;
+    margin: 20px 0;
+    background-color: #ffffff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
 }
 
 .flashcard img {
@@ -118,17 +161,36 @@ h1 {
 
 .question-text {
     font-weight: bold;
-    color: #00796b; /* Match heading color */
+    color: #1976d2;
+    font-size: 18px;
 }
 
 .answer-text {
-    color: #555;
-    margin-top: 10px; /* Slightly more space */
+    color: #424242;
+    margin-top: 15px;
+    font-size: 16px;
 }
 
 footer {
     text-align: center;
-    margin-top: 30px;
+    margin-top: 35px;
     font-size: 14px;
-    color: #757575; /* Light grey for footer text */
+    color: #757575;
+}
+
+/* Spinner styles */
+.spinner {
+    border: 6px solid #e0e0e0;
+    border-top: 6px solid #6200ea;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    display: none;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

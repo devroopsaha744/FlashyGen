@@ -8,14 +8,14 @@
     <style>
         /* Spinner styles */
         .spinner {
-            border: 5px solid #f3f3f3; /* Light grey */
-            border-top: 5px solid #3498db; /* Blue */
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
             border-radius: 50%;
             width: 30px;
             height: 30px;
             animation: spin 1s linear infinite;
-            display: none; /* Hide spinner initially */
-            margin: 10px auto; /* Center the spinner */
+            display: none;
+            margin: 10px auto;
         }
 
         @keyframes spin {
@@ -69,21 +69,28 @@
             <button id="text-option" class="option-button">Enter Text</button>
         </div>
 
+        <div class="flashcard-type-selection">
+            <label for="flashcard-type">Select Flashcard Type:</label>
+            <select id="flashcard-type">
+                <option value="traditional">Traditional</option>
+                <option value="cloze">Cloze Deletion</option>
+            </select>
+        </div>
+
         <!-- PDF Upload Section -->
         <div id="pdf-upload-section" class="upload-section">
             <label for="pdf-upload">Upload a PDF file to create flashcards:</label>
             <input type="file" id="pdf-upload" accept=".pdf" />
             <button id="upload-btn" class="styled-button">Generate Flashcards</button>
-            <div id="pdf-spinner" class="spinner"></div> <!-- Spinner for PDF -->
+            <div id="pdf-spinner" class="spinner"></div>
         </div>
-
 
         <!-- PPT Upload Section -->
         <div id="ppt-upload-section" class="upload-section hidden">
             <label for="ppt-upload">Upload a PPT file to create flashcards:</label>
             <input type="file" id="ppt-upload" accept=".ppt,.pptx" />
             <button id="ppt-btn" class="styled-button">Generate Flashcards</button>
-            <div id="ppt-spinner" class="spinner"></div> <!-- Spinner for PPT -->
+            <div id="ppt-spinner" class="spinner"></div>
         </div>
 
         <!-- DOCX Upload Section -->
@@ -91,7 +98,7 @@
             <label for="docx-upload">Upload a DOCX file to create flashcards:</label>
             <input type="file" id="docx-upload" accept=".docx" />
             <button id="docx-btn" class="styled-button">Generate Flashcards</button>
-            <div id="docx-spinner" class="spinner"></div> <!-- Spinner for DOCX -->
+            <div id="docx-spinner" class="spinner"></div>
         </div>
 
         <!-- Spreadsheet Upload Section -->
@@ -99,7 +106,7 @@
             <label for="spreadsheet-upload">Upload a Spreadsheet to create flashcards:</label>
             <input type="file" id="spreadsheet-upload" accept=".xlsx,.csv" />
             <button id="spreadsheet-btn" class="styled-button">Generate Flashcards</button>
-            <div id="spreadsheet-spinner" class="spinner"></div> <!-- Spinner for Spreadsheet -->
+            <div id="spreadsheet-spinner" class="spinner"></div>
         </div>
 
         <!-- Text Input Section -->
@@ -107,7 +114,7 @@
             <label for="text-input">Enter Text to create flashcards:</label>
             <textarea id="text-input" rows="6" placeholder="Enter your text here..."></textarea>
             <button id="text-btn" class="styled-button">Generate Flashcards</button>
-            <div id="text-spinner" class="spinner"></div> <!-- Spinner for Text input -->
+            <div id="text-spinner" class="spinner"></div>
         </div>
 
         <!-- Flashcards Display Section -->
@@ -121,7 +128,6 @@
     </div>
 
     <script>
-        // JavaScript logic for handling button clicks and toggling visibility
         const options = {
             pdf: 'pdf-upload-section',
             ppt: 'ppt-upload-section',
@@ -135,7 +141,6 @@
             const section = document.getElementById(options[option]);
 
             button.addEventListener('click', () => {
-                // Make the clicked button active and show its corresponding section
                 Object.keys(options).forEach(opt => {
                     document.getElementById(`${opt}-option`).classList.remove('active');
                     document.getElementById(options[opt]).classList.add('hidden');
@@ -147,7 +152,10 @@
 
         async function handleUpload(event, formData, endpoint, spinnerId) {
             const spinner = document.getElementById(spinnerId);
-            spinner.style.display = 'block'; // Show spinner
+            spinner.style.display = 'block';
+
+            const flashcardType = document.getElementById("flashcard-type").value;
+            formData.append("type", flashcardType); // Add the flashcard type to the formData
 
             try {
                 const response = await fetch(endpoint, {
@@ -165,68 +173,30 @@
                 console.error("Error during fetch:", error);
                 alert("An error occurred while processing your request.");
             } finally {
-                spinner.style.display = 'none'; // Hide spinner after response
+                spinner.style.display = 'none';
             }
         }
 
-        // PDF Button Event
-        document.getElementById("upload-btn").addEventListener("click", (event) => {
-            const fileInput = document.getElementById("pdf-upload");
-            const file = fileInput.files[0];
-            if (!file) {
-                alert("Please upload a PDF file.");
-                return;
-            }
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("method", "pdf");
-            handleUpload(event, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", "pdf-spinner");
-        });
+        function setupButtonEvent(buttonId, fileInputId, method, spinnerId) {
+            document.getElementById(buttonId).addEventListener("click", (event) => {
+                const fileInput = document.getElementById(fileInputId);
+                const file = fileInput.files[0];
+                if (!file) {
+                    alert("Please upload a file.");
+                    return;
+                }
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("method", method);
+                handleUpload(event, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", spinnerId);
+            });
+        }
 
+        setupButtonEvent("upload-btn", "pdf-upload", "pdf", "pdf-spinner");
+        setupButtonEvent("ppt-btn", "ppt-upload", "pptx", "ppt-spinner");
+        setupButtonEvent("docx-btn", "docx-upload", "docx", "docx-spinner");
+        setupButtonEvent("spreadsheet-btn", "spreadsheet-upload", "csv", "spreadsheet-spinner");
 
-        // PPT Button Event
-        document.getElementById("ppt-btn").addEventListener("click", (event) => {
-            const fileInput = document.getElementById("ppt-upload");
-            const file = fileInput.files[0];
-            if (!file) {
-                alert("Please upload a PPT file.");
-                return;
-            }
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("method", "pptx");
-            handleUpload(event, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", "ppt-spinner");
-        });
-
-        // DOCX Button Event
-        document.getElementById("docx-btn").addEventListener("click", (event) => {
-            const fileInput = document.getElementById("docx-upload");
-            const file = fileInput.files[0];
-            if (!file) {
-                alert("Please upload a DOCX file.");
-                return;
-            }
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("method", "docx");
-            handleUpload(event, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", "docx-spinner");
-        });
-
-        // Spreadsheet Button Event
-        document.getElementById("spreadsheet-btn").addEventListener("click", (event) => {
-            const fileInput = document.getElementById("spreadsheet-upload");
-            const file = fileInput.files[0];
-            if (!file) {
-                alert("Please upload a Spreadsheet file.");
-                return;
-            }
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("method", "csv");
-            handleUpload(event, formData, "https://flashcard-generator-mdhf.onrender.com/flashcard/", "spreadsheet-spinner");
-        });
-
-        // Text Button Event
         document.getElementById("text-btn").addEventListener("click", (event) => {
             const textInput = document.getElementById("text-input");
             const text = textInput.value.trim();
@@ -242,7 +212,7 @@
 
         function displayFlashcards(flashcards) {
             const container = document.getElementById("flashcards-container");
-            container.innerHTML = ""; // Clear existing flashcards
+            container.innerHTML = "";
             flashcards.forEach(card => {
                 const cardElement = document.createElement("div");
                 cardElement.className = "flashcard";

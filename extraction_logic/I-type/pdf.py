@@ -32,7 +32,7 @@ def extract_text_from_pdf(pdf_path: str) -> str:
 
 
 # Set up the LLM
-llm = ChatGroq(temperature=0, model="llama3-groq-70b-8192-tool-use-preview")
+llm = ChatGroq(temperature=0, model="llama3-8b-8192")
 structured_llm = llm.with_structured_output(FlashcardSet)
 
 # Define prompt
